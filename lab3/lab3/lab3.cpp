@@ -1,11 +1,11 @@
 ﻿#include <iostream>
 
-class List {
-    class Node {
+class List {    //stack implementation (list)
+    class Node {    //item of the list
     public:
-        int n;
-        Node* next;
-        Node* prev;
+        int n;  //value of item
+        Node* next; //next item
+        Node* prev; //previous item
         Node() {
             n = NULL;
             next = nullptr;
@@ -17,26 +17,26 @@ class List {
             prev = nullptr;
         }
     };
-    Node* begin;
-    Node* end;
+    Node* begin;    //pointer to the beginning of the list
+    Node* end;  //pointer to the end of the list
 public:
-    int size;
+    int size;   //number of items
     List() {
         begin = new Node();
         end = new Node();
         size = 0;
     }
-    Node* getEnd(){
-        if (size == 0) {
+    Node* getEnd(){ //return the end
+        if (size == 0) {    //list is empty
             return nullptr;
         }
-        else if (size == 1) {
+        else if (size == 1) {   //return the begin
             return begin;
         }
         return end;
     }
-    void pushBack(int n) {
-        if (size == 0) {
+    void pushBack(int n) {  //add item in the end
+        if (size == 0) {    //item is the begin of list
             begin->n = n;
         }
         else if (size == 1) {
@@ -53,8 +53,8 @@ public:
         }
         size++;
     }
-    void popBack() {
-        if (size == 1) {
+    void popBack() {    //remove end item
+        if (size == 1) {    //remove begin
             begin->n = NULL;
             size--;
         }
@@ -72,17 +72,17 @@ public:
     }
 };
 
-class Heap {
+class Heap {   //heap implementation
 private:
-    const int LENGTH = 10000;
-    int* arr;
-    int size;
-    class Iterator {
-        int* arr;
-        int* size;
-        List* stack;
-        int pos;
-        char type;
+    const int LENGTH = 10000;   //size of array of items
+    int* arr;   //array of items
+    int size;   //real number of items
+    class Iterator {    //iterator of heap implementation 
+        int* arr;   //pointer to array of items
+        int* size;  //pointer to real number of items
+        List* stack;    //stack of passed items
+        int pos;    //current position in array
+        char type;  //type of iterator: 'd' - DFS, 'b' - BFS
     public:
         Iterator(int* arr, int* size, List* stack, char type, int pos = 0) {
             this->arr = arr;
@@ -90,52 +90,52 @@ private:
             this->stack = stack;
             this->type = type;
             this->pos = pos;
-            if (stack->size == 0)
+            if (stack->size == 0)   //root of heap
                 stack->pushBack(0);
         };
         ~Iterator() = default;
-        Iterator operator++() {
+        Iterator operator++() { //get next iterator
             int newPos = pos; 
-            if (type == 'd') {
-                if (newPos * 2 + 1 < *size) {
+            if (type == 'd') {  //DFS
+                if (newPos * 2 + 1 < *size) {   //left child of item 
                     newPos = newPos * 2 + 1;
                     stack->pushBack(newPos);
                 }
                 else {
-                    while (((newPos - 1) / 2) * 2 + 2  != newPos + 1 || newPos + 1 >= *size) {
-                        newPos = (newPos - 1) / 2;
-                        if (newPos == 0) {
+                    while (((newPos - 1) / 2) * 2 + 2  != newPos + 1 || newPos + 1 >= *size) {  //parent with child
+                        newPos = (newPos - 1) / 2;  //going up
+                        if (newPos == 0) {  //have reached the root, end
                             return *this;
                         }
                     }
-                    ++newPos;
+                    ++newPos;   //right chilp of item
                     stack->pushBack(newPos);
                 }
             }
-            else {
-                if (newPos + 1 >= *size)
+            else {  //BFS
+                if (newPos + 1 >= *size)    //end
                     return *this;
-                newPos++;
+                newPos++;   //next item of array is next step of BFS
                 stack->pushBack(newPos);
             }
             pos = newPos;
             return *this;
         }
-        Iterator operator--() {
-            if (pos == 0)
+        Iterator operator--() { //get prev iterator
+            if (pos == 0)   //have reached the root, end
                 return *this;
-            pos = stack->getEnd()->prev->n;
+            pos = stack->getEnd()->prev->n; //get penultimate item of stack
             stack->popBack();
             return *this;
         }
-        Iterator operator+(const int& c) {
+        Iterator operator+(const int& c) {  //get iterator after c count of steps forward
             auto iter = *(new Iterator(arr, size, stack, type, pos));
             for (int i = 0; i < c; i++) {
                 ++iter;
             }
             return iter;
         }
-        Iterator operator-(const int& c) {
+        Iterator operator-(const int& c) {  //get iterator after c count of steps backward
             auto iter = *(new Iterator(arr, size, stack, type, pos));
             for (int i = 0; i < c; i++) {
                 --iter;
@@ -150,16 +150,16 @@ private:
         Iterator operator-() const{
             return *this;
         }
-        int val() {
+        int val() { //value of current item
             return arr[pos];
         }
     };
-    void heapify(int i) {
-        int left = 2 * i + 1;
-        int right = 2 * i + 2;
+    void heapify(int i) {   //restoring heap after removing item
+        int left = 2 * i + 1;   //left child
+        int right = 2 * i + 2;  //right child
         int el;
         if (left < size) {
-            if (arr[i] < arr[left]) {
+            if (arr[i] < arr[left]) {   //rearrange
                 el = arr[i];
                 arr[i] = arr[left];
                 arr[left] = el;
@@ -167,7 +167,7 @@ private:
             }
         }
         if (right < size) {
-            if (arr[i] < arr[right]) {
+            if (arr[i] < arr[right]) {  //reaarange
                 el = arr[i];
                 arr[i] = arr[right];
                 arr[right] = el;
@@ -175,7 +175,7 @@ private:
             }
         }
     }
-    int getPos(int n) {
+    int getPos(int n) { //get position of item with n value
         if (n > arr[0])
             return -1;
         for (int i = 0; i < size; i++) {
@@ -189,7 +189,7 @@ public:
         arr = new int[LENGTH];
         size = 0;
     }
-    bool contains(int n) {
+    bool contains(int n) {  //checked availability of item with n value
         if (n > arr[0])
             return false;
         for (int i = 0; i < size; i++) {
@@ -198,11 +198,11 @@ public:
         }
         return false;
     }
-    void insert(int n) {
+    void insert(int n) { 
         int i = size;
-        arr[i] = n;
-        int parent = (i - 1) / 2;
-        while (parent >= 0 && arr[parent] < arr[i] && i > 0) {
+        arr[i] = n; //at the end of array
+        int parent = (i - 1) / 2;   //parent of item
+        while (parent >= 0 && arr[parent] < arr[i] && i > 0) {  //if item more than parent, swap it
             int el = arr[i];
             arr[i] = arr[parent];
             arr[parent] = el;
